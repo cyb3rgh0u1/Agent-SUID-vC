@@ -1515,6 +1515,25 @@ Structure command_list[COMMANDS] = {
 
 
 
+// Function to create "Agent SUID" directory and log file
+void setup_logging(char* log_path) {
+    char dir_path[LENGTH];
+    snprintf(dir_path, sizeof(dir_path), "%s/Agent SUID", getenv("HOME"));
+    mkdir(dir_path, 0755); // Create the directory with read/write/execute permissions
+
+    snprintf(log_path, LENGTH, "%s/log.txt", dir_path);
+    FILE* log_file = fopen(log_path, "a");
+    if (log_file) {
+        time_t now = time(NULL);
+        struct tm* t = localtime(&now);
+        fprintf(log_file, "Run at: %04d-%02d-%02d %02d:%02d:%02d\n",
+                t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+                t->tm_hour, t->tm_min, t->tm_sec);
+        fclose(log_file);
+    } else {
+        fprintf(stderr, "Error: Cannot create log file.\n");
+    }
+}
 
 // Function to extract the basename from a path
 const char* get_basename(const char* path) {
@@ -1543,6 +1562,10 @@ int main() {
     printf("Enter paths one per line (press Enter on an empty line to finish):\n");
     printf("\n");
 
+    // Logging setup
+    char log_path[LENGTH];
+    setup_logging(log_path);
+
     // Input paths
     while (1) {
         fgets(input, LENGTH, stdin);
@@ -1568,13 +1591,21 @@ int main() {
     printf("Details on privilege escalation techniques:\n");
 
 
-    for (int i = 0; i < num_matches; i++) {
-        printf("-------------------------------------------------\n");
-        const char* command = find_command(matches[i]);
-        if (command) {
-            printf("%s", command);
+    FILE* log_file = fopen(log_path, "a");
+    if (log_file) {
+        for (int i = 0; i < num_matches; i++) {
+            fprintf(log_file, "Binary: %s\n", matches[i]);
+            printf("-------------------------------------------------\n");
+            const char* command = find_command(matches[i]);
+            if (command) {
+                printf("%s", command);
+                fprintf(log_file, "%s\n", command);
+            }
+            printf("-------------------------------------------------\n");
         }
-        printf("-------------------------------------------------\n");
+        fclose(log_file);
+    } else {
+        fprintf(stderr, "Error: Cannot open log file for writing.\n");
     }
 
     return 0;
