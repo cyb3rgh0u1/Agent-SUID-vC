@@ -1519,6 +1519,14 @@ Structure command_list[COMMANDS] = {
 
 
 
+// Initialize remaining command_list entries to NULL
+void initialize_command_list() {
+    for (int i = 1; i < COMMANDS; i++) {
+        command_list[i].keyword = NULL;
+        command_list[i].command = NULL;
+    }
+}
+
 // Function to create "Agent SUID" directory and log file
 void setup_logging(char* log_path) {
     char dir_path[LENGTH];
@@ -1548,7 +1556,7 @@ const char* get_basename(const char* path) {
 // Function to find a command by keyword
 const char* find_command(const char* keyword) {
     for (int i = 0; i < COMMANDS; i++) {
-        if (strcmp(keyword, command_list[i].keyword) == 0) {
+        if (command_list[i].keyword && strcmp(keyword, command_list[i].keyword) == 0) {
             return command_list[i].command;
         }
     }
@@ -1560,20 +1568,24 @@ int main() {
     char input[LENGTH];
     int num_paths = 0;
     const char* matches[PATHS];  // Array to store matching basenames
+    const char* match_commands[PATHS]; // Array to store matching commands
     int num_matches = 0;
 
     printf("\nAgent-SUID vC1.0 by CyberGhoul - the ultimate tool for discovering exploitable SUID binaries on your system. This tool is designed to help security professionals identify potential privilege escalation vectors.\n");
     printf("Enter paths one per line (press Enter on an empty line to finish):\n");
     printf("\n");
 
+    // Initialize command list
+    initialize_command_list();
+
     // Logging setup
     char log_path[LENGTH];
     setup_logging(log_path);
 
     // Input paths
-    while (1) {
+    while (num_paths < PATHS) {
         fgets(input, LENGTH, stdin);
-        if (input[0] == '\n') break;
+        if (input[0] == '\n') break; // Stop on empty line
         strncpy(paths[num_paths], input, LENGTH - 1);
         paths[num_paths][LENGTH - 1] = '\0';  // Ensure null-termination
         paths[num_paths][strcspn(paths[num_paths], "\n")] = '\0';  // Remove newline
@@ -1586,7 +1598,10 @@ int main() {
         const char* command = find_command(basename);
         if (command) {
             matches[num_matches] = basename;  // Store matching basename
+            match_commands[num_matches] = command;  // Store matching command
             num_matches++;
+        } else {
+            printf("No command found for: %s\n", basename); // Debugging output
         }
     }
 
@@ -1594,17 +1609,13 @@ int main() {
     printf("\nExploitable SUID Binaries Overview: %d found\n", num_matches);
     printf("Details on privilege escalation techniques:\n");
 
-
     FILE* log_file = fopen(log_path, "a");
     if (log_file) {
         for (int i = 0; i < num_matches; i++) {
             fprintf(log_file, "Binary: %s\n", matches[i]);
             printf("-------------------------------------------------\n");
-            const char* command = find_command(matches[i]);
-            if (command) {
-                printf("%s", command);
-                fprintf(log_file, "%s\n", command);
-            }
+            printf("%s", match_commands[i]);  // Output the matched command
+            fprintf(log_file, "%s\n", match_commands[i]);
             printf("-------------------------------------------------\n");
         }
         fclose(log_file);
