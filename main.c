@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 
 #define PATHS 100
 #define LENGTH 256
