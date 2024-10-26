@@ -1519,13 +1519,7 @@ Structure command_list[COMMANDS] = {
 
 
 
-// Initialize remaining command_list entries to NULL
-void initialize_command_list() {
-    for (int i = 1; i < COMMANDS; i++) {
-        command_list[i].keyword = NULL;
-        command_list[i].command = NULL;
-    }
-}
+
 
 // Function to create "Agent SUID" directory and log file
 void setup_logging(char* log_path) {
@@ -1575,8 +1569,6 @@ int main() {
     printf("Enter paths one per line (press Enter on an empty line to finish):\n");
     printf("\n");
 
-    // Initialize command list
-    initialize_command_list();
 
     // Logging setup
     char log_path[LENGTH];
