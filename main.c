@@ -1527,7 +1527,14 @@ void setup_logging(char* log_path) {
     snprintf(dir_path, sizeof(dir_path), "%s/Agent SUID", getenv("HOME"));
     mkdir(dir_path, 0755); // Create the directory with read/write/execute permissions
 
-    snprintf(log_path, LENGTH, "%s/log.txt", dir_path);
+   // snprintf(log_path, LENGTH, "%s/log.txt", dir_path);
+
+    // Ensure there's enough space for the log file path
+    if (snprintf(log_path, LENGTH, "%s/log.txt", dir_path) >= LENGTH) {
+        fprintf(stderr, "Error: log path is too long.\n");
+        return; // Handle the error as appropriate
+    }
+
     FILE* log_file = fopen(log_path, "a");
     if (log_file) {
         time_t now = time(NULL);
