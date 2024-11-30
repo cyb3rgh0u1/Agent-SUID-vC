@@ -13,9 +13,9 @@
 typedef struct {
     char* keyword;
     char* command;
-} Structure;
+} Command;
 
-Structure command_list[COMMANDS] = {
+Command command_list[COMMANDS] = {
     {"aa-exec",
         "aa-exec:\n"
     "    sudo install -m =xs $(which aa-exec) .\n"
@@ -1527,8 +1527,6 @@ void setup_logging(char* log_path) {
     snprintf(dir_path, sizeof(dir_path), "%s/Agent SUID", getenv("HOME"));
     mkdir(dir_path, 0755); // Create the directory with read/write/execute permissions
 
-   // snprintf(log_path, LENGTH, "%s/log.txt", dir_path);
-
     // Ensure there's enough space for the log file path
     if (snprintf(log_path, LENGTH, "%s/log.txt", dir_path) >= LENGTH) {
         fprintf(stderr, "Error: log path is too long.\n");
@@ -1575,7 +1573,6 @@ int main() {
     printf("\nAgent-SUID vC1.0 by CyberGhoul - the ultimate tool for discovering exploitable SUID binaries on your system. This tool is designed to help security professionals identify potential privilege escalation vectors.\n");
     printf("Enter paths one per line (press Enter on an empty line to finish):\n");
     printf("\n");
-
 
     // Logging setup
     char log_path[LENGTH];
@@ -1624,5 +1621,3 @@ int main() {
 
     return 0;
 }
-
-
